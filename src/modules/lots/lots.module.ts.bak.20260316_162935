@@ -1,0 +1,16 @@
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Lot } from './entities/lot.entity';
+import { Category } from '../categories/entities/category.entity';
+import { Sale } from '../sales/entities/sale.entity';
+import { User } from '../users/entities/user.entity';
+import { LotsController } from './lots.controller';
+import { LotsService } from './lots.service';
+
+@Module({
+  imports: [TypeOrmModule.forFeature([Lot, Category, Sale, User])],
+  controllers: [LotsController],
+  providers: [LotsService],
+  exports: [LotsService],
+})
+export class LotsModule {}

@@ -1,0 +1,119 @@
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Raw, Repository } from 'typeorm';
+import { User } from './entities/user.entity';
+
+@Injectable()
+export class UsersService {
+  constructor(
+    @InjectRepository(User)
+    private readonly usersRepository: Repository<User>,
+  ) {}
+
+  async findAll(): Promise<User[]> {
+    return this.usersRepository.find({
+      order: {
+        createdAt: 'DESC',
+      },
+    });
+  }
+
+  async findByEmail(email: string): Promise<User | null> {
+    return this.usersRepository.findOne({
+      where: {
+        email: Raw((alias) => `LOWER(${alias}) = LOWER(:email)`, { email }),
+      },
+    });
+  }
+
+  async findById(id: string): Promise<User | null> {
+    return this.usersRepository.findOne({
+      where: { id } as any,
+    });
+  }
+
+  async updateLastLogin(id: string): Promise<void> {
+    await this.usersRepository.update(id, {
+      lastLoginAt: new Date(),
+      updatedAt: new Date(),
+    } as any);
+  }
+
+  async update(
+    id: string,
+    data: Partial<{
+      firstName: string;
+      lastName: string;
+      phone: string;
+      languageCode: string;
+      status: string;
+      role: string;
+      isEmailVerified: boolean;
+      isPhoneVerified: boolean;
+    }>,
+  ): Promise<User> {
+    const user = await this.usersRepository.findOne({
+      where: { id } as any,
+    });
+
+    if (!user) {
+      throw new NotFoundException('Utilisateur introuvable');
+    }
+
+    if (data.firstName !== undefined) user.firstName = data.firstName ? String(data.firstName).trim() : null as any;
+    if (data.lastName !== undefined) user.lastName = data.lastName ? String(data.lastName).trim() : null as any;
+    if (data.phone !== undefined) user.phone = data.phone ? String(data.phone).trim() : null as any;
+    if (data.languageCode !== undefined) user.languageCode = data.languageCode ? String(data.languageCode).trim() : null as any;
+    if (data.status !== undefined) user.status = String(data.status) as any;
+    if (data.role !== undefined) user.role = String(data.role) as any;
+    if (data.isEmailVerified !== undefined) user.isEmailVerified = !!data.isEmailVerified;
+    if (data.isPhoneVerified !== undefined) user.isPhoneVerified = !!data.isPhoneVerified;
+
+    user.updatedAt = new Date();
+
+    return this.usersRepository.save(user);
+  }
+
+  async remove(id: string): Promise<{ success: true; id: string }> {
+    const user = await this.usersRepository.findOne({
+      where: { id } as any,
+    });
+
+    if (!user) {
+      throw new NotFoundException('Utilisateur introuvable');
+    }
+
+    await this.usersRepository.remove(user);
+
+    return {
+      success: true,
+      id,
+    };
+  }
+  async findSellers(): Promise<any[]> {
+    const users = await this.usersRepository.find({
+      order: { createdAt: 'DESC' } as any,
+    });
+
+    return (users || [])
+      .filter((u: any) => {
+        const role = String(u.role || '').toLowerCase();
+        const isActive = u.isActive ?? (String(u.status || '').toLowerCase() !== 'inactive');
+        return isActive && (role === 'seller' || role === 'admin' || role === 'supervisor');
+      })
+      .map((u: any) => ({
+        id: u.id,
+        email: u.email,
+        firstName: u.firstName ?? u.first_name ?? null,
+        lastName: u.lastName ?? u.last_name ?? null,
+        fullName:
+          [u.firstName ?? u.first_name, u.lastName ?? u.last_name]
+            .filter(Boolean)
+            .join(' ')
+            .trim() || u.email,
+        role: u.role,
+        status: u.status ?? null,
+      }));
+  }
+
+}

@@ -1,0 +1,36 @@
+﻿import { Module } from '@nestjs/common';
+import { AppController } from './app.controller';
+
+// ⚠️ Garde TES imports existants ici (TypeORM, modules, etc.)
+import { TypeOrmModule } from '@nestjs/typeorm';
+
+// Exemple (adapte selon ton projet)
+import { CategoriesModule } from './modules/categories/categories.module';
+import { UsersModule } from './modules/users/users.module';
+import { LotsModule } from './modules/lots/lots.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { SellersModule } from './modules/sellers/sellers.module';
+import { SettingsModule } from './modules/settings/settings.module';
+import { ActivityLogsModule } from './modules/activity-logs/activity-logs.module';
+import { SalesModule } from './modules/sales/sales.module';
+import { BidsModule } from './modules/bids/bids.module';
+import { UploadsModule } from './modules/uploads/uploads.module';
+
+@Module({
+  imports: [
+    TypeOrmModule.forRoot(), // adapte si config externe
+    CategoriesModule,
+    UsersModule,
+    LotsModule,
+    AuthModule,
+    SellersModule,
+    SettingsModule,
+    ActivityLogsModule,
+    SalesModule,
+    BidsModule,
+    UploadsModule,
+  ],
+  controllers: [AppController],
+  providers: [],
+})
+export class AppModule {}

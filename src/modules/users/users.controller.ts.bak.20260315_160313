@@ -1,0 +1,92 @@
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Patch,
+} from '@nestjs/common';
+import { UsersService } from './users.service';
+
+@Controller('users')
+export class UsersController {
+  constructor(private readonly usersService: UsersService) {}
+
+  @Get()
+  async findAll() {
+    const users = await this.usersService.findAll();
+
+    return users.map((u) => ({
+      id: u.id,
+      email: u.email,
+      role: String(u.role),
+      status: String(u.status),
+      first_name: u.firstName || null,
+      last_name: u.lastName || null,
+      full_name: [u.firstName, u.lastName].filter(Boolean).join(' ').trim(),
+      phone: u.phone || null,
+      language_code: u.languageCode || null,
+      is_email_verified: u.isEmailVerified,
+      is_phone_verified: u.isPhoneVerified,
+      last_login_at: u.lastLoginAt || null,
+      created_at: u.createdAt,
+      updated_at: u.updatedAt || null,
+    }));
+  }
+
+  @Patch(':id')
+  async update(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() body: any,
+  ) {
+    const user = await this.usersService.update(id, {
+      firstName: body.firstName ?? body.first_name,
+      lastName: body.lastName ?? body.last_name,
+      phone: body.phone,
+      languageCode: body.languageCode ?? body.language_code,
+      status: body.status,
+      role: body.role,
+      isEmailVerified: body.isEmailVerified ?? body.is_email_verified,
+      isPhoneVerified: body.isPhoneVerified ?? body.is_phone_verified,
+    });
+
+    return {
+      id: user.id,
+      email: user.email,
+      role: String(user.role),
+      status: String(user.status),
+      first_name: user.firstName || null,
+      last_name: user.lastName || null,
+      full_name: [user.firstName, user.lastName].filter(Boolean).join(' ').trim(),
+      phone: user.phone || null,
+      language_code: user.languageCode || null,
+      is_email_verified: user.isEmailVerified,
+      is_phone_verified: user.isPhoneVerified,
+      last_login_at: user.lastLoginAt || null,
+      created_at: user.createdAt,
+      updated_at: user.updatedAt || null,
+    };
+  }
+
+  @Patch(':id/status')
+  async updateStatus(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() body: { status: string },
+  ) {
+    return this.update(id, { status: body?.status });
+  }
+
+  @Patch(':id/role')
+  async updateRole(
+    @Param('id', new ParseUUIDPipe()) id: string,
+    @Body() body: { role: string },
+  ) {
+    return this.update(id, { role: body?.role });
+  }
+
+  @Delete(':id')
+  async remove(@Param('id', new ParseUUIDPipe()) id: string) {
+    return this.usersService.remove(id);
+  }
+}

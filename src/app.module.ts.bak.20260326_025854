@@ -1,0 +1,37 @@
+﻿import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { typeOrmConfig } from './config/typeorm.config';
+import { Module } from '@nestjs/common';
+import { AppController } from './app.controller';
+
+import { CategoriesModule } from './modules/categories/categories.module';
+import { LotsModule } from './modules/lots/lots.module';
+import { UsersModule } from './modules/users/users.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { SettingsModule } from './modules/settings/settings.module';
+import { ActivityLogsModule } from './modules/activity-logs/activity-logs.module';
+import { UploadsModule } from './modules/uploads/uploads.module';
+import { BidsModule } from './modules/bids/bids.module';
+import { SalesModule } from './modules/sales/sales.module';
+
+import { SellersModule } from './modules/sellers/sellers.module';
+
+@Module({
+  imports: [SellersModule, ConfigModule.forRoot({
+      isGlobal: true,
+    }),
+    TypeOrmModule.forRoot(typeOrmConfig),
+    controllers: [AppController],
+    CategoriesModule,
+    LotsModule,
+    UsersModule,
+    AuthModule,
+    SettingsModule,
+    ActivityLogsModule,
+    UploadsModule,
+    BidsModule,
+    SalesModule,
+  ],
+})
+export class AppModule {}

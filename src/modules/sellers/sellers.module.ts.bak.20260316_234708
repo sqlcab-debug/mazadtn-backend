@@ -1,0 +1,11 @@
+﻿import { Module } from '@nestjs/common';
+import { SellersController } from './sellers.controller';
+import { SellersModule } from './modules/sellers/sellers.module';
+
+@Module({
+  controllers: [SellersController],
+})
+export class SellersModule {}
+imports: [
+  SellersModule,
+]
