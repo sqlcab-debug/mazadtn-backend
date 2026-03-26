@@ -1,0 +1,24 @@
+﻿name: Deploy MazadTN
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+
+    steps:
+      - name: Show runner info
+        shell: powershell
+        run: |
+          hostname
+          whoami
+          Get-Date
+
+      - name: Launch deployment
+        shell: powershell
+        run: |
+          Set-ExecutionPolicy Bypass -Scope Process -Force
+          C:\MazadTN\Tools\Deploy-MazadTN-Auto.ps1
